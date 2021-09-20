@@ -1,0 +1,14 @@
+spring:
+  data:
+    mongodb:
+      host: localhost
+      port: 27017
+      database: test
+      #uri: mongodb://[root:root@]localhost:27017/test
+
+  kafka:
+    bootstrap-servers: localhost:9092
+
+server:
+  port: 8081
+
