@@ -1,14 +1,18 @@
-package com.tradingbot.tickerservice.ticker;
+package com.tradingbot.tickerservice.domain;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
+import lombok.*;
 import org.springframework.boot.jackson.JsonComponent;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDateTime;
 
@@ -16,6 +20,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonComponent
+@Builder
 @Document(collection = "tickers")
 public class Ticker {
     @JsonIgnore
@@ -25,11 +30,6 @@ public class Ticker {
     private String symbol;
     @JsonProperty("tickType")
     private String tickType;
-    //timetag와 크게 다르지 않다면 없애도될듯
-    @JsonProperty("date")
-    private String date;
-    @JsonProperty("time")
-    private String time;
     @JsonProperty("openPrice")
     private double openPrice;
     @JsonProperty("closePrice")
@@ -54,7 +54,12 @@ public class Ticker {
     private double chgAmt;
     @JsonProperty("volumePower")
     private double volumePower;
+    @JsonSerialize(using = LocalDateTimeSerializer.class)
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
+
     @JsonProperty("timeTag")
+    //@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")
     @Field("timeTag")
     private LocalDateTime timeTag = LocalDateTime.now();
 }

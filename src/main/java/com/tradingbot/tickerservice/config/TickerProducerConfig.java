@@ -19,7 +19,8 @@ import java.util.Map;
 public class TickerProducerConfig {
     @Value("${spring.kafka.bootstrap-servers}")
     private String bootStrapServers;
-    @Value("${spring.kafka.properties.sasl.jaas.config}")
+
+   @Value("${spring.kafka.properties.sasl.jaas.config}")
     private String JAAS_CONFIG;
     @Value("${spring.kafka.security.protocol}")
     private String SECURITY_PROTOCOL;
@@ -27,6 +28,7 @@ public class TickerProducerConfig {
     private String SASL_MECHANISM;
     @Value("${spring.kafka.ssl.endpoint}")
     private String SSL_ENDPOINT;
+
 
     @Bean
     public DirectChannel producerChannel() {
