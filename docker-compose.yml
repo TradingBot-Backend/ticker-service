@@ -1,7 +1,7 @@
 version: "3.7"
 services:
   app:
-    container_name: "coin_information"
+    container_name: "ticker-service"
     build: .
     restart: always
     ports:

@@ -24,9 +24,11 @@ public class ReactiveMongoConfig extends AbstractReactiveMongoConfiguration {
     private String password;
 
     @Override
-    public MongoClient reactiveMongoClient(){ConnectionString connString = new ConnectionString("mongodb+srv://"+username+":"+password+"@cluster0.hncbk.mongodb.net/myFirstDatabase?retryWrites=true&w=majority");
+    public MongoClient reactiveMongoClient(){
+        ConnectionString connString = new ConnectionString("mongodb+srv://"+username+":"+password+"@cluster0.hncbk.mongodb.net/myFirstDatabase?retryWrites=true&w=majority");
         MongoClientSettings settings = MongoClientSettings.builder()
                 .applyConnectionString(connString)
+
                 .retryWrites(true)
                 .build();
         return MongoClients.create(settings);

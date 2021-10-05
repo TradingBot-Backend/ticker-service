@@ -8,12 +8,15 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
+
 @EnableReactiveMongoRepositories
 @Repository
 public interface TickerRepository extends ReactiveCrudRepository<Ticker, String> {
     Mono<Ticker> save(Ticker ticker);
 
     Flux<Ticker> saveAll(Flux<Ticker> tickerStream);
+
+    Flux<Ticker> findTickersByTimeTagIsAfter(LocalDateTime date);
 
     Flux<Ticker> findTickersBySymbol(String symbol);
 

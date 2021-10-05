@@ -6,8 +6,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.redis.core.HashOperations;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
@@ -21,17 +25,24 @@ import static org.mockito.ArgumentMatchers.anyString;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyString;
+@DataMongoTest
 
 class MovingAverageServiceImplTest {
     MovingAverageServiceImpl maServiceImpl;
     @Autowired
     private TickerRepository tickerRepository;
+    @Autowired
+    RedisTemplate<String, String> redisTemplate;
+
+
     @BeforeEach
     void setUp() {
-        maServiceImpl = new MovingAverageServiceImpl(tickerRepository);
+        maServiceImpl = new MovingAverageServiceImpl(tickerRepository, redisTemplate);
+
     }
     @Test
-    void findSecMovingAverage() {
+    void loadSecMovingAverage() {
+
     }
 
     @Test
@@ -57,6 +68,5 @@ class MovingAverageServiceImplTest {
         testData.add(Ticker.builder().id(anyString()).symbol("BTC_KRW").closePrice(4).timeTag(LocalDateTime.now().minusDays(2)).build());
         testData.add(Ticker.builder().id(anyString()).symbol("ETH_KRW").closePrice(2).timeTag(LocalDateTime.now().minusDays(3)).build());
         tickerRepository.saveAll(Flux.fromStream(testData.stream())).blockLast();
-        assertThat(maServiceImpl.findDayMovingAverage("ETH_KRW",9).block()).isEqualTo(2.8);
     }
 }

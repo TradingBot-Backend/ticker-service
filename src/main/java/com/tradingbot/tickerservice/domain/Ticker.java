@@ -54,9 +54,9 @@ public class Ticker {
     private double chgAmt;
     @JsonProperty("volumePower")
     private double volumePower;
+
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)
-
     @JsonProperty("timeTag")
     //@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")

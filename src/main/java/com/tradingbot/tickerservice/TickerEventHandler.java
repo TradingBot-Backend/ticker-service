@@ -3,16 +3,16 @@ package com.tradingbot.tickerservice;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.tradingbot.tickerservice.domain.MovingAverage;
-import com.tradingbot.tickerservice.domain.Symbol;
-import com.tradingbot.tickerservice.domain.Ticker;
+import com.tradingbot.tickerservice.domain.*;
 import com.tradingbot.tickerservice.service.MovingAverageService;
 import com.tradingbot.tickerservice.service.TickerService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.data.redis.connection.ReactiveRedisConnectionFactory;
 import org.springframework.data.redis.core.HashOperations;
+import org.springframework.data.redis.core.ReactiveRedisOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
@@ -26,6 +26,7 @@ import reactor.core.publisher.Mono;
 
 import java.net.URI;
 import java.net.http.HttpClient;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 @Slf4j
 @Component
@@ -47,7 +48,7 @@ public class TickerEventHandler implements CommandLineRunner, InitializingBean {
                 .distinct()
                 .map(i -> new StringBuffer("https://api.upbit.com/v1/candles/days?count=200&market=KRW-")
                         .append(i.toString().substring(0, i.toString().indexOf("_"))).toString())
-                .forEach(uri -> client.get().uri(uri).retrieve().bodyToFlux(String.class).log()
+                .forEach(uri -> client.get().uri(uri).retrieve().bodyToFlux(String.class)
                         .map(response ->
                                 response.replaceAll("market", "symbol")
                                         .replaceAll("KRW-", "")
@@ -84,7 +85,7 @@ public class TickerEventHandler implements CommandLineRunner, InitializingBean {
                                                 ",'tickTypes':['30M']}")))
                                 .thenMany(session.receive().map(WebSocketMessage::getPayloadAsText))
                                 .filter(text -> text.startsWith("{\"type\":\"ticker\""))
-                                .map(text-> text.replaceAll("_KRW", ""))
+                                .map(text -> text.replaceAll("_KRW", ""))
                                 .map(message -> {
                                     try {
                                         return objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
@@ -101,29 +102,19 @@ public class TickerEventHandler implements CommandLineRunner, InitializingBean {
                                     }
                                 })
                                 .doOnNext(ticker -> tickerService.save(ticker).subscribe())
-                                .doOnNext(ticker -> movingAverageService.findDayMovingAverage(ticker.getSymbol(), MovingAverage.DMA5.getValue())
-                                        .doOnNext(value -> hashOperations
-                                                .put(ticker.getSymbol(),"5DMA",value.toString()))
-                                        .subscribe())
-                                .doOnNext(ticker -> hashOperations.put(ticker.getSymbol(),"5DMA_TIMETAG",ticker.getTimeTag().toString()))
-                                .doOnNext(ticker -> movingAverageService.findDayMovingAverage(ticker.getSymbol(), MovingAverage.DMA20.getValue())
-                                        .doOnNext(value -> hashOperations
-                                                .put(ticker.getSymbol(),"20DMA",value.toString()))
-                                        .subscribe())
-                                .doOnNext(ticker -> hashOperations.put(ticker.getSymbol(),"20DMA_TIMETAG",ticker.getTimeTag().toString()))
-                                .doOnNext(ticker -> movingAverageService.findDayMovingAverage(ticker.getSymbol(), MovingAverage.DMA60.getValue())
-                                        .doOnNext(value -> hashOperations
-                                                .put(ticker.getSymbol(),"60DMA",value.toString()))
-                                        .subscribe())
-                                .doOnNext(ticker -> hashOperations.put(ticker.getSymbol(),"60DMA_TIMETAG",ticker.getTimeTag().toString()))
-                                .doOnNext(ticker -> movingAverageService.findDayMovingAverage(ticker.getSymbol(), MovingAverage.DMA120.getValue())
-                                        .doOnNext(value -> hashOperations
-                                                .put(ticker.getSymbol(),"120DMA",value.toString()))
-                                        .subscribe())
-                                .doOnNext(ticker -> hashOperations.put(ticker.getSymbol(),"120DMA_TIMETAG",ticker.getTimeTag().toString()))
+                                .doOnNext(ticker -> hashOperations.put(ticker.getSymbol(), "CLOSED_PRICE", Double.toString(ticker.getClosePrice())))
+                                .doOnNext(ticker -> {
+                                    try {
+                                        hashOperations.put(ticker.getSymbol(), "TICKER", objectMapper.writeValueAsString(ticker));
+                                    } catch (JsonProcessingException e) {
+                                        e.printStackTrace();
+                                    }
+                                })
+                                .doOnNext(ticker -> movingAverageService.loadMinMovingAverage(ticker))
+                                .doOnNext(ticker -> movingAverageService.loadHourMovingAverage(ticker))
+                                .doOnNext(ticker -> movingAverageService.loadDayMovingAverage(ticker))
                                 .doOnNext(ticker -> tickerService.deleteOldData(180).subscribe())
                                 .then()).log()
                 .repeat().log().subscribe();
     }
-
 }

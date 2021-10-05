@@ -19,16 +19,15 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
-@EnableReactiveMongoRepositories
 @DataMongoTest
 @ExtendWith(SpringExtension.class)
 class TickerServiceImplTest {
     TickerServiceImpl tickerService;
     @Autowired private TickerRepository tickerRepository;
-    @BeforeEach
+  /*  @BeforeEach
     void setUp() {
         tickerService = new TickerServiceImpl(tickerRepository);
-    }
+    }*/
 
     @Test @DisplayName("save")
     void save() {

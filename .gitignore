@@ -38,3 +38,4 @@ out/
 
 ### ignore yml file ###
 src/main/resources/application.yml
+Dockerfile
