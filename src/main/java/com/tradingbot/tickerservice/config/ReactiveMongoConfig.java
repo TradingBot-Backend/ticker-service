@@ -1,6 +1,7 @@
 package com.tradingbot.tickerservice.config;
 import com.mongodb.ConnectionString;
 import com.mongodb.MongoClientSettings;
+import com.mongodb.connection.ConnectionPoolSettings;
 import com.mongodb.reactivestreams.client.MongoClient;
 
 import com.mongodb.reactivestreams.client.MongoClients;
@@ -22,13 +23,13 @@ public class ReactiveMongoConfig extends AbstractReactiveMongoConfiguration {
     private String username;
     @Value("${spring.mongodb.password}")
     private String password;
-
+    @Value("${spring.mongodb.uri}")
+    private String uri;
     @Override
     public MongoClient reactiveMongoClient(){
-        ConnectionString connString = new ConnectionString("mongodb+srv://"+username+":"+password+"@cluster0.hncbk.mongodb.net/myFirstDatabase?retryWrites=true&w=majority");
+        ConnectionString connString = new ConnectionString(uri);
         MongoClientSettings settings = MongoClientSettings.builder()
                 .applyConnectionString(connString)
-
                 .retryWrites(true)
                 .build();
         return MongoClients.create(settings);
@@ -36,10 +37,10 @@ public class ReactiveMongoConfig extends AbstractReactiveMongoConfiguration {
 
     @Bean
     public MongoDatabase mongoDatabase(){
-        return reactiveMongoClient().getDatabase("myFirstDatabase");
+        return reactiveMongoClient().getDatabase("test");
     }
     @Override
     protected String getDatabaseName() {
-        return "myFirstDatabase";
+        return "test";
     }
 }

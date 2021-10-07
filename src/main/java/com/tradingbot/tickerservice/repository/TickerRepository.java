@@ -16,9 +16,12 @@ public interface TickerRepository extends ReactiveCrudRepository<Ticker, String>
 
     Flux<Ticker> saveAll(Flux<Ticker> tickerStream);
 
+    Flux<Ticker> findAll();
+
     Flux<Ticker> findTickersByTimeTagIsAfter(LocalDateTime date);
 
     Flux<Ticker> findTickersBySymbol(String symbol);
+
 
     Flux<Ticker> findTickersBySymbolAndTimeTagIsAfter(String symbol, LocalDateTime date);
 

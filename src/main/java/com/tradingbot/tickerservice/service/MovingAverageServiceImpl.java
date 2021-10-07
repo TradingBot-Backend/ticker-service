@@ -29,15 +29,14 @@ public class MovingAverageServiceImpl implements MovingAverageService, Initializ
     public void loadSecMovingAverage(Ticker ticker) {
         Arrays.stream(SecondMovingAverage.values())
                 .forEach(seconds ->
-                        tickerRepository
-                                .findTickersBySymbolAndTimeTagIsAfter(ticker.getSymbol(),
-                                        LocalDateTime.now().minusSeconds(seconds.getValue()))
-                                .defaultIfEmpty(ticker)
+                        tickerRepository.findTickersBySymbolAndTimeTagIsAfter(ticker.getSymbol(),LocalDateTime.now().minusSeconds(seconds.getValue()))
+
                                 .collect(Collectors.averagingDouble(Ticker::getClosePrice))
                                 .doOnNext(value -> {
                                     hashOperations.put(ticker.getSymbol(), seconds.name(), value.toString());
                                     hashOperations.put(ticker.getSymbol(), seconds.name()+"_TIMETAG",ticker.getTimeTag().toString());
-                                }).subscribe());
+                                })
+                                .subscribe());
     }
 
     @Override
@@ -45,9 +44,7 @@ public class MovingAverageServiceImpl implements MovingAverageService, Initializ
         Arrays.stream(MinuteMovingAverage.values())
                 .forEach(minutes ->
                         tickerRepository
-                                .findTickersBySymbolAndTimeTagIsAfter(ticker.getSymbol(),
-                                        LocalDateTime.now().minusSeconds(minutes.getValue()))
-                                .defaultIfEmpty(ticker)
+                                .findTickersBySymbolAndTimeTagIsAfter(ticker.getSymbol(),LocalDateTime.now().minusMinutes(minutes.getValue()))
                                 .collect(Collectors.averagingDouble(Ticker::getClosePrice))
                                 .doOnNext(value -> {
                                     hashOperations.put(ticker.getSymbol(), minutes.name(), value.toString());
@@ -60,9 +57,7 @@ public class MovingAverageServiceImpl implements MovingAverageService, Initializ
         Arrays.stream(HourMovingAverage.values())
                 .forEach(hours ->
                         tickerRepository
-                                .findTickersBySymbolAndTimeTagIsAfter(ticker.getSymbol(),
-                                        LocalDateTime.now().minusSeconds(hours.getValue()))
-                                .defaultIfEmpty(ticker)
+                                .findTickersBySymbolAndTimeTagIsAfter(ticker.getSymbol(),LocalDateTime.now().minusHours(hours.getValue()))
                                 .collect(Collectors.averagingDouble(Ticker::getClosePrice))
                                 .doOnNext(value -> {
                                     hashOperations.put(ticker.getSymbol(), hours.name(), value.toString());
@@ -75,9 +70,7 @@ public class MovingAverageServiceImpl implements MovingAverageService, Initializ
         Arrays.stream(DayMovingAverage.values())
                 .forEach(days ->
                         tickerRepository
-                                .findTickersBySymbolAndTimeTagIsAfter(ticker.getSymbol(),
-                                        LocalDateTime.now().minusSeconds(days.getValue()))
-                                .defaultIfEmpty(ticker)
+                                .findTickersBySymbolAndTimeTagIsAfter(ticker.getSymbol(),LocalDateTime.now().minusDays(days.getValue()))
                                 .collect(Collectors.averagingDouble(Ticker::getClosePrice))
                                 .doOnNext(value -> {
                                     hashOperations.put(ticker.getSymbol(), days.name(), value.toString());
