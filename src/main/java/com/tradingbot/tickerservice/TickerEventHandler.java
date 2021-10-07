@@ -42,7 +42,7 @@ public class TickerEventHandler implements CommandLineRunner, InitializingBean {
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        //tickerService.deleteAll().subscribe();
+        tickerService.deleteAll().subscribe();
         WebClient client = WebClient.create();
         Arrays.stream(Symbol.values())
                 .distinct()
@@ -94,13 +94,13 @@ public class TickerEventHandler implements CommandLineRunner, InitializingBean {
                                         throw Exceptions.propagate(e);
                                     }
                                 })
-                                /*.doOnNext(tickers -> {
+                                .doOnNext(tickers -> {
                                     try {
                                         kafkaTemplate.send(tickers.getSymbol(), objectMapper.writeValueAsString(tickers));
                                     } catch (JsonProcessingException e) {
                                         e.printStackTrace();
                                     }
-                                })*/
+                                })
                                 .doOnNext(ticker -> tickerService.save(ticker).subscribe())
                                 .doOnNext(ticker -> hashOperations.put(ticker.getSymbol(), "CLOSED_PRICE", Double.toString(ticker.getClosePrice())))
                                 .doOnNext(ticker -> {
