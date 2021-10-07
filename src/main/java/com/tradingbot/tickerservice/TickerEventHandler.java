@@ -42,7 +42,7 @@ public class TickerEventHandler implements CommandLineRunner, InitializingBean {
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        tickerService.deleteAll().subscribe();
+        //tickerService.deleteAll().subscribe();
         WebClient client = WebClient.create();
         Arrays.stream(Symbol.values())
                 .distinct()

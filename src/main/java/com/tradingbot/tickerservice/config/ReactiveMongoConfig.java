@@ -13,9 +13,8 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.config.AbstractReactiveMongoConfiguration;
+import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
 import org.springframework.data.mongodb.repository.config.EnableReactiveMongoRepositories;
-
-
 
 @Configuration
 public class ReactiveMongoConfig extends AbstractReactiveMongoConfiguration {
@@ -23,11 +22,11 @@ public class ReactiveMongoConfig extends AbstractReactiveMongoConfiguration {
     private String username;
     @Value("${spring.mongodb.password}")
     private String password;
-    @Value("${spring.mongodb.uri}")
-    private String uri;
+    //@Value("${spring.mongodb.uri}")
+    //private String uri;
     @Override
     public MongoClient reactiveMongoClient(){
-        ConnectionString connString = new ConnectionString(uri);
+        ConnectionString connString = new ConnectionString("mongodb+srv://tradingbot:qltTja123!@cluster0.hncbk.mongodb.net/myFirstDatabase?retryWrites=true&w=majority");
         MongoClientSettings settings = MongoClientSettings.builder()
                 .applyConnectionString(connString)
                 .retryWrites(true)
@@ -39,8 +38,14 @@ public class ReactiveMongoConfig extends AbstractReactiveMongoConfiguration {
     public MongoDatabase mongoDatabase(){
         return reactiveMongoClient().getDatabase("test");
     }
+
+    @Bean
+    public ReactiveMongoTemplate reactiveMongoTemplate(){
+        return new ReactiveMongoTemplate(reactiveMongoClient(), getDatabaseName());
+    }
+
     @Override
     protected String getDatabaseName() {
-        return "test";
+        return "myFirstDatabase";
     }
 }

@@ -16,7 +16,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class TickerServiceImpl implements TickerService {
     private final TickerRepository tickerRepository;
-    private final MongoDatabase mongoDatabase;
 
     @Override
     public Mono<Ticker> save(Ticker ticker) {

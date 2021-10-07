@@ -1,6 +1,7 @@
 package com.tradingbot.tickerservice.repository;
 
 import com.tradingbot.tickerservice.domain.Ticker;
+import org.springframework.data.mongodb.repository.Aggregation;
 import org.springframework.data.mongodb.repository.config.EnableReactiveMongoRepositories;
 import org.springframework.data.repository.reactive.ReactiveCrudRepository;
 import org.springframework.stereotype.Repository;
@@ -12,6 +13,14 @@ import java.time.LocalDateTime;
 @EnableReactiveMongoRepositories
 @Repository
 public interface TickerRepository extends ReactiveCrudRepository<Ticker, String> {
+
+    @Aggregation({
+            "{$match:{ symbol : }}",
+            "{$match:{ timeTag : { $gte: }}",
+            "{$group: { _id: '$symbol', closePrice : {$avg: '$closePrice'}}}"
+    })
+    Mono<Double> getMovingAverageBySymbolAndPeriod(String symbol, LocalDateTime date);
+
     Mono<Ticker> save(Ticker ticker);
 
     Flux<Ticker> saveAll(Flux<Ticker> tickerStream);

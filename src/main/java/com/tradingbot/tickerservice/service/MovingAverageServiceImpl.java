@@ -6,6 +6,11 @@ import com.tradingbot.tickerservice.domain.*;
 import com.tradingbot.tickerservice.repository.TickerRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
+import org.springframework.data.mongodb.core.aggregation.Aggregation;
+import org.springframework.data.mongodb.core.aggregation.GroupOperation;
+import org.springframework.data.mongodb.core.aggregation.MatchOperation;
+import org.springframework.data.mongodb.core.aggregation.UnwindOperation;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -16,49 +21,54 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
+import static org.springframework.data.mongodb.core.aggregation.Aggregation.*;
+import static org.springframework.data.mongodb.core.query.Criteria.where;
 @Service
 @RequiredArgsConstructor
 public class MovingAverageServiceImpl implements MovingAverageService, InitializingBean {
     private final TickerRepository tickerRepository;
     private final RedisTemplate<String, String> redisTemplate;
-    private final ObjectMapper objectMapper;
-
+    private final ReactiveMongoTemplate reactiveMongoTemplate;
     private HashOperations<String, String, String> hashOperations;
-
-    @Override
-    public void loadSecMovingAverage(Ticker ticker) {
-        Arrays.stream(SecondMovingAverage.values())
-                .forEach(seconds ->
-                        tickerRepository.findTickersBySymbolAndTimeTagIsAfter(ticker.getSymbol(),LocalDateTime.now().minusSeconds(seconds.getValue()))
-
-                                .collect(Collectors.averagingDouble(Ticker::getClosePrice))
-                                .doOnNext(value -> {
-                                    hashOperations.put(ticker.getSymbol(), seconds.name(), value.toString());
-                                    hashOperations.put(ticker.getSymbol(), seconds.name()+"_TIMETAG",ticker.getTimeTag().toString());
-                                })
-                                .subscribe());
-    }
 
     @Override
     public void loadMinMovingAverage(Ticker ticker) {
         Arrays.stream(MinuteMovingAverage.values())
                 .forEach(minutes ->
-                        tickerRepository
-                                .findTickersBySymbolAndTimeTagIsAfter(ticker.getSymbol(),LocalDateTime.now().minusMinutes(minutes.getValue()))
-                                .collect(Collectors.averagingDouble(Ticker::getClosePrice))
-                                .doOnNext(value -> {
-                                    hashOperations.put(ticker.getSymbol(), minutes.name(), value.toString());
-                                    hashOperations.put(ticker.getSymbol(), minutes.name()+"_TIMETAG",ticker.getTimeTag().toString());
-                                }).subscribe());
+                        reactiveMongoTemplate.aggregate(
+                                Aggregation.newAggregation(
+                                        Ticker.class,
+                                        match(where("symbol")
+                                                .is(ticker.getSymbol())
+                                                .and("timeTag")
+                                                .gte(LocalDateTime.now().minusMinutes(minutes.getValue()))),
+                                        group("$symbol")
+                                                .avg("$closePrice")
+                                                .as("average")),
+                                MovingAverage.class)
+                                //.doOnNext(System.out::println)
+                                        .doOnNext(value -> {
+                                            hashOperations.put(ticker.getSymbol(), minutes.name(), value.toString());
+                                            hashOperations.put(ticker.getSymbol(), minutes.name()+"_TIMETAG",ticker.getTimeTag().toString());
+                                        }).subscribe());
     }
 
     @Override
     public void loadHourMovingAverage(Ticker ticker) {
         Arrays.stream(HourMovingAverage.values())
                 .forEach(hours ->
-                        tickerRepository
-                                .findTickersBySymbolAndTimeTagIsAfter(ticker.getSymbol(),LocalDateTime.now().minusHours(hours.getValue()))
-                                .collect(Collectors.averagingDouble(Ticker::getClosePrice))
+                        reactiveMongoTemplate.aggregate(
+                                        Aggregation.newAggregation(
+                                                Ticker.class,
+                                                match(where("symbol")
+                                                        .is(ticker.getSymbol())
+                                                        .and("timeTag")
+                                                        .gte(LocalDateTime.now().minusHours(hours.getValue()))),
+                                                group("$symbol")
+                                                        .avg("$closePrice")
+                                                        .as("average")),
+                                        MovingAverage.class)
+                                .doOnNext(System.out::println)
                                 .doOnNext(value -> {
                                     hashOperations.put(ticker.getSymbol(), hours.name(), value.toString());
                                     hashOperations.put(ticker.getSymbol(), hours.name()+"_TIMETAG",ticker.getTimeTag().toString());
@@ -69,9 +79,18 @@ public class MovingAverageServiceImpl implements MovingAverageService, Initializ
     public void loadDayMovingAverage(Ticker ticker) {
         Arrays.stream(DayMovingAverage.values())
                 .forEach(days ->
-                        tickerRepository
-                                .findTickersBySymbolAndTimeTagIsAfter(ticker.getSymbol(),LocalDateTime.now().minusDays(days.getValue()))
-                                .collect(Collectors.averagingDouble(Ticker::getClosePrice))
+                        reactiveMongoTemplate.aggregate(
+                                        Aggregation.newAggregation(
+                                                Ticker.class,
+                                                match(where("symbol")
+                                                        .is(ticker.getSymbol())
+                                                        .and("timeTag")
+                                                        .gte(LocalDateTime.now().minusHours(days.getValue()))),
+                                                group("$symbol")
+                                                        .avg("$closePrice")
+                                                        .as("average")),
+                                        MovingAverage.class)
+                                //.doOnNext(System.out::println)
                                 .doOnNext(value -> {
                                     hashOperations.put(ticker.getSymbol(), days.name(), value.toString());
                                     hashOperations.put(ticker.getSymbol(), days.name()+"_TIMETAG",ticker.getTimeTag().toString());
