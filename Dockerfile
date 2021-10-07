@@ -4,4 +4,4 @@ VOLUME /tmp
 ARG JAR_FILE=./build/libs/*.jar
 ADD ${JAR_FILE} app.jar
 EXPOSE 8085
-ENTRYPOINT ["java","-Dspring.data.mongodb.uri=mongodb://{local}/?readPreference=primary&appname=MongoDB%20Compass&directConnection=true&ssl=false","-Djava.security.egd=file:/dev/./uradom","-jar","/app.jar"]
+ENTRYPOINT ["java","-Dspring.data.mongodb.uri=mongodb+srv://{userid}:{password}!@cluster0.hncbk.mongodb.net/myFirstDatabase?retryWrites=true&w=majority","-Djava.security.egd=file:/dev/./uradom","-jar","/app.jar"]

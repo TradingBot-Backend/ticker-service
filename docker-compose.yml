@@ -1,17 +1,5 @@
 version: "3.7"
 services:
-  mongo:
-    image: "mongo:4.4.8"
-    container_name: mongo
-    restart: always
-    ports:
-      - 27017:27017
-    environment:
-      - MONGO_DATA_DIR=/data/db
-      - MONGO_LOG_DIR=/dev/null
-    volumes:
-      - ./data/db:/data/db
-
 
   app:
     container_name: "ticker-service"

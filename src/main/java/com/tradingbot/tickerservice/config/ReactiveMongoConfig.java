@@ -20,10 +20,14 @@ import org.springframework.data.mongodb.repository.config.EnableReactiveMongoRep
 public class ReactiveMongoConfig extends AbstractReactiveMongoConfiguration {
 
     @Value("${spring.mongodb.uri}")
-    private String uri;
+    private String mongoUri;
+
+    @Value("${spring.mongodb.database}")
+    private String mongoDatabase;
+
     @Override
     public MongoClient reactiveMongoClient(){
-        ConnectionString connString = new ConnectionString(uri);
+        ConnectionString connString = new ConnectionString(mongoUri);
         MongoClientSettings settings = MongoClientSettings.builder()
                 .applyConnectionString(connString)
                 .retryWrites(true)
@@ -31,10 +35,6 @@ public class ReactiveMongoConfig extends AbstractReactiveMongoConfiguration {
         return MongoClients.create(settings);
     }
 
-    @Bean
-    public MongoDatabase mongoDatabase(){
-        return reactiveMongoClient().getDatabase("test");
-    }
 
     @Bean
     public ReactiveMongoTemplate reactiveMongoTemplate(){
@@ -43,6 +43,6 @@ public class ReactiveMongoConfig extends AbstractReactiveMongoConfiguration {
 
     @Override
     protected String getDatabaseName() {
-        return "test";
+        return mongoDatabase;
     }
 }

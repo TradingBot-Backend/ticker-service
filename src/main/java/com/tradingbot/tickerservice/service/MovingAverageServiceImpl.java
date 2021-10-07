@@ -47,7 +47,7 @@ public class MovingAverageServiceImpl implements MovingAverageService, Initializ
                                                 .as("average")),
                                 MovingAverage.class)
                                         .doOnNext(value -> {
-                                            hashOperations.put(ticker.getSymbol(), minutes.name(), value.toString());
+                                            hashOperations.put(ticker.getSymbol(), minutes.name(), Double.toString(value.getAverage()));
                                             hashOperations.put(ticker.getSymbol(), minutes.name()+"_TIMETAG",ticker.getTimeTag().toString());
                                         }).subscribe());
     }
@@ -68,7 +68,7 @@ public class MovingAverageServiceImpl implements MovingAverageService, Initializ
                                                         .as("average")),
                                         MovingAverage.class)
                                 .doOnNext(value -> {
-                                    hashOperations.put(ticker.getSymbol(), hours.name(), value.toString());
+                                    hashOperations.put(ticker.getSymbol(), hours.name(), Double.toString(value.getAverage()));
                                     hashOperations.put(ticker.getSymbol(), hours.name()+"_TIMETAG",ticker.getTimeTag().toString());
                                 }).subscribe());
     }
@@ -89,7 +89,7 @@ public class MovingAverageServiceImpl implements MovingAverageService, Initializ
                                                         .as("average")),
                                         MovingAverage.class)
                                 .doOnNext(value -> {
-                                    hashOperations.put(ticker.getSymbol(), days.name(), value.toString());
+                                    hashOperations.put(ticker.getSymbol(), days.name(), Double.toString(value.getAverage()));
                                     hashOperations.put(ticker.getSymbol(), days.name()+"_TIMETAG",ticker.getTimeTag().toString());
                                 }).subscribe());
     }
