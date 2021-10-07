@@ -22,11 +22,11 @@ public class ReactiveMongoConfig extends AbstractReactiveMongoConfiguration {
     private String username;
     @Value("${spring.mongodb.password}")
     private String password;
-    //@Value("${spring.mongodb.uri}")
-    //private String uri;
+    @Value("${spring.mongodb.uri}")
+    private String uri;
     @Override
     public MongoClient reactiveMongoClient(){
-        ConnectionString connString = new ConnectionString("mongodb+srv://tradingbot:qltTja123!@cluster0.hncbk.mongodb.net/myFirstDatabase?retryWrites=true&w=majority");
+        ConnectionString connString = new ConnectionString(uri);
         MongoClientSettings settings = MongoClientSettings.builder()
                 .applyConnectionString(connString)
                 .retryWrites(true)

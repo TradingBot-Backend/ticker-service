@@ -1,16 +1,16 @@
 version: "3.7"
 services:
-#  mongo:
-#    image: "mongo:4.4.8"
-#    container_name: mongo
-#    restart: always
-#    ports:
-#      - 27017:27017
-#    environment:
-#      - MONGO_DATA_DIR=/data/db
-#      - MONGO_LOG_DIR=/dev/null
-#    volumes:
-#      - ./data/db:/data/db
+  mongo:
+    image: "mongo:4.4.8"
+    container_name: mongo
+    restart: always
+    ports:
+      - 27017:27017
+    environment:
+      - MONGO_DATA_DIR=/data/db
+      - MONGO_LOG_DIR=/dev/null
+    volumes:
+      - ./data/db:/data/db
   db:
     image: "redis:alpine"
     hostname: redis
@@ -23,7 +23,7 @@ services:
     restart: always
     ports:
       - "8085:8085"
-#    depends_on:
-#      - mongo
+    depends_on:
+      - mongo
     links:
       - "db:redis"

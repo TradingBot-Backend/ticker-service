@@ -46,7 +46,6 @@ public class MovingAverageServiceImpl implements MovingAverageService, Initializ
                                                 .avg("$closePrice")
                                                 .as("average")),
                                 MovingAverage.class)
-                                //.doOnNext(System.out::println)
                                         .doOnNext(value -> {
                                             hashOperations.put(ticker.getSymbol(), minutes.name(), value.toString());
                                             hashOperations.put(ticker.getSymbol(), minutes.name()+"_TIMETAG",ticker.getTimeTag().toString());
@@ -68,7 +67,6 @@ public class MovingAverageServiceImpl implements MovingAverageService, Initializ
                                                         .avg("$closePrice")
                                                         .as("average")),
                                         MovingAverage.class)
-                                .doOnNext(System.out::println)
                                 .doOnNext(value -> {
                                     hashOperations.put(ticker.getSymbol(), hours.name(), value.toString());
                                     hashOperations.put(ticker.getSymbol(), hours.name()+"_TIMETAG",ticker.getTimeTag().toString());
@@ -90,7 +88,6 @@ public class MovingAverageServiceImpl implements MovingAverageService, Initializ
                                                         .avg("$closePrice")
                                                         .as("average")),
                                         MovingAverage.class)
-                                //.doOnNext(System.out::println)
                                 .doOnNext(value -> {
                                     hashOperations.put(ticker.getSymbol(), days.name(), value.toString());
                                     hashOperations.put(ticker.getSymbol(), days.name()+"_TIMETAG",ticker.getTimeTag().toString());
