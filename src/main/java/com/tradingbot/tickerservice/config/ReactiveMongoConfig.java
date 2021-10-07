@@ -43,6 +43,6 @@ public class ReactiveMongoConfig extends AbstractReactiveMongoConfiguration {
 
     @Override
     protected String getDatabaseName() {
-        return "myFirstDatabase";
+        return "test";
     }
 }
