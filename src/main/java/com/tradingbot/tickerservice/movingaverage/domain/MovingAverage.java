@@ -1,4 +1,4 @@
-package com.tradingbot.tickerservice.domain;
+package com.tradingbot.tickerservice.movingaverage.domain;
 
 import lombok.Data;
 import org.springframework.data.mongodb.core.mapping.Document;

@@ -1,16 +1,13 @@
-package com.tradingbot.tickerservice.service;
+package com.tradingbot.tickerservice.ticker.service;
 
-import com.mongodb.reactivestreams.client.MongoDatabase;
-import com.tradingbot.tickerservice.domain.Ticker;
-import com.tradingbot.tickerservice.repository.TickerRepository;
+import com.tradingbot.tickerservice.ticker.domain.Ticker;
+import com.tradingbot.tickerservice.ticker.repository.TickerRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor

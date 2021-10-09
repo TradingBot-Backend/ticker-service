@@ -1,0 +1,65 @@
+package com.tradingbot.tickerservice.ticker;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.tradingbot.tickerservice.ticker.domain.Symbol;
+import com.tradingbot.tickerservice.ticker.domain.Ticker;
+import com.tradingbot.tickerservice.ticker.service.TickerService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.data.redis.core.HashOperations;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.socket.client.WebSocketClient;
+import reactor.core.Exceptions;
+import reactor.core.publisher.Flux;
+
+import java.util.Arrays;
+@Slf4j
+@Component
+@RequiredArgsConstructor
+public class TickerLoader implements InitializingBean {
+    private final ObjectMapper objectMapper;
+    private final WebSocketClient client;
+    private final TickerService tickerService;
+    private final RedisTemplate<String, String> redisTemplate;
+    private HashOperations<String, String, String> hashOperations;
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        WebClient client = WebClient.create();
+        /*Arrays.stream(Symbol.values())
+                .distinct()
+                .map(symbol -> new StringBuffer("https://api.upbit.com/v1/candles/days?count=200&market=KRW-")
+                        .append(symbol.toString().substring(0, symbol.toString().indexOf("_"))).toString())
+                .forEach(uri -> client.get().uri(uri).retrieve().bodyToFlux(String.class)
+                        .map(response ->
+                                response.replaceAll("market", "symbol")
+                                        .replaceAll("KRW-", "")
+                                        .replaceAll("opening_price", "openPrice")
+                                        .replaceAll("trade_price", "closePrice")
+                                        .replaceAll("high_price", "highPrice")
+                                        .replaceAll("low_price", "lowPrice")
+                                        .replaceAll("candle_acc_trade_price", "")
+                                        .replaceAll("candle_acc_trade_volume", "")
+                                        .replaceAll("prev_closing_price", "prevClosePrice")
+                                        .replaceAll("candle_date_time_kst", "timeTag")
+                                        .replaceAll("change_price", "chgAmt")
+                                        .replaceAll("change_rate", "chgRate")
+                                        .replaceAll(":00:00", ":00:00.000"))
+                        .map(response -> {
+                            try {
+                                return objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                                        .readValue(response, Ticker[].class);
+                            } catch (JsonProcessingException e) {
+                                throw Exceptions.propagate(e);
+                            }})
+                        .flatMap(i -> Flux.fromArray(i))
+                        .doOnNext(ticker -> tickerService.save(ticker).subscribe())
+                        .subscribe());*/
+
+    }
+}

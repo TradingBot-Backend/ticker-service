@@ -18,10 +18,7 @@ import org.springframework.data.mongodb.repository.config.EnableReactiveMongoRep
 
 @Configuration
 public class ReactiveMongoConfig extends AbstractReactiveMongoConfiguration {
-    @Value("${spring.mongodb.username}")
-    private String username;
-    @Value("${spring.mongodb.password}")
-    private String password;
+
     @Value("${spring.mongodb.uri}")
     private String uri;
     @Override

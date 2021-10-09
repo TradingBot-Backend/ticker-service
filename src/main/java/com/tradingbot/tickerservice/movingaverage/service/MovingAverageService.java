@@ -1,8 +1,7 @@
-package com.tradingbot.tickerservice.service;
+package com.tradingbot.tickerservice.movingaverage.service;
 
-import com.tradingbot.tickerservice.domain.Ticker;
+import com.tradingbot.tickerservice.ticker.domain.Ticker;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Mono;
 
 @Service
 public interface MovingAverageService {

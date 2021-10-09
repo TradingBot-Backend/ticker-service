@@ -1,8 +1,8 @@
-package com.tradingbot.tickerservice.repository;
+package com.tradingbot.tickerservice.ticker.service;
 
-import com.tradingbot.tickerservice.domain.Ticker;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
+import com.tradingbot.tickerservice.ticker.domain.Ticker;
+import com.tradingbot.tickerservice.ticker.repository.TickerRepository;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,22 +17,17 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
-
 @DataMongoTest
 @ExtendWith(SpringExtension.class)
-class TickerRepositoryTest {
-    @Autowired
-    TickerRepository tickerRepository;
-
-    @BeforeEach
+class TickerServiceImplTest {
+    TickerServiceImpl tickerService;
+    @Autowired private TickerRepository tickerRepository;
+  /*  @BeforeEach
     void setUp() {
-    }
+        tickerService = new TickerServiceImpl(tickerRepository);
+    }*/
 
-    @AfterEach
-    void tearDown() {
-    }
-
-    @Test
+    @Test @DisplayName("save")
     void save() {
         Ticker ticker = Ticker.builder()
                 .id(anyString())
@@ -52,17 +47,33 @@ class TickerRepositoryTest {
                 .volumePower(140)
                 .timeTag(LocalDateTime.now())
                 .build();
-        tickerRepository.save(ticker).as(StepVerifier::create).expectNextMatches(tick -> {
+        tickerService.save(ticker).as(StepVerifier::create).expectNextMatches(tick -> {
             assertThat(tick.getSymbol()).contains("ETH_KRW");
             return true;
         }).verifyComplete();
+    }
 
-
+    @Test
+    void findAll() {
+        tickerService.deleteAll().subscribe();
+        List<Ticker> testData = new ArrayList<>();
+        testData.add(Ticker.builder().id(anyString()).symbol("ETH_KRW").timeTag(LocalDateTime.now()).build());
+        testData.add(Ticker.builder().id(anyString()).symbol("ETH_KRW").timeTag(LocalDateTime.now().minusDays(5)).build());
+        testData.add(Ticker.builder().id(anyString()).symbol("ETH_KRW").timeTag(LocalDateTime.now().minusDays(10)).build());
+        testData.add(Ticker.builder().id(anyString()).symbol("ETH_KRW").timeTag(LocalDateTime.now().minusDays(2)).build());
+        testData.add(Ticker.builder().id(anyString()).symbol("ETH_KRW").timeTag(LocalDateTime.now().minusDays(3)).build());
+        testData.add(Ticker.builder().id(anyString()).symbol("BTC_KRW").timeTag(LocalDateTime.now()).build());
+        testData.add(Ticker.builder().id(anyString()).symbol("XLM_KRW").timeTag(LocalDateTime.now().minusDays(5)).build());
+        testData.add(Ticker.builder().id(anyString()).symbol("ADA_KRW").timeTag(LocalDateTime.now().minusDays(10)).build());
+        testData.add(Ticker.builder().id(anyString()).symbol("BTC_KRW").timeTag(LocalDateTime.now().minusDays(2)).build());
+        testData.add(Ticker.builder().id(anyString()).symbol("ETH_KRW").timeTag(LocalDateTime.now().minusDays(3)).build());
+        tickerService.saveAll(Flux.fromStream(testData.stream())).blockLast();
+        assertThat(tickerService.findAll().count().block()).isEqualTo(10);
     }
 
     @Test
     void findTickersBySymbol() {
-        tickerRepository.deleteAll().subscribe();
+        tickerService.deleteAll().subscribe();
         List<Ticker> testData = new ArrayList<>();
         testData.add(Ticker.builder().id(anyString()).symbol("ETH_KRW").timeTag(LocalDateTime.now()).build());
         testData.add(Ticker.builder().id(anyString()).symbol("ETH_KRW").timeTag(LocalDateTime.now().minusDays(5)).build());
@@ -74,50 +85,14 @@ class TickerRepositoryTest {
         testData.add(Ticker.builder().id(anyString()).symbol("ADA_KRW").timeTag(LocalDateTime.now().minusDays(10)).build());
         testData.add(Ticker.builder().id(anyString()).symbol("BTC_KRW").timeTag(LocalDateTime.now().minusDays(2)).build());
         testData.add(Ticker.builder().id(anyString()).symbol("ETH_KRW").timeTag(LocalDateTime.now().minusDays(3)).build());
-        tickerRepository.saveAll(testData).subscribe();
-        assertThat(tickerRepository.findTickersBySymbol("ETH_KRW").count().block()).isEqualTo(6);
+        tickerService.saveAll(Flux.fromStream(testData.stream())).blockLast();
+        assertThat(tickerService.findTickersBySymbol("ETH_KRW").count().block()).isEqualTo(6);
     }
 
-    @Test
-    void findTickersBySymbolAndTimeTagIsAfter() {
-        tickerRepository.deleteAll().subscribe();
-        List<Ticker> testData = new ArrayList<>();
-        testData.add(Ticker.builder().id(anyString()).symbol("ETH_KRW").timeTag(LocalDateTime.now()).build());
-        testData.add(Ticker.builder().id(anyString()).symbol("ETH_KRW").timeTag(LocalDateTime.now().minusDays(5)).build());
-        testData.add(Ticker.builder().id(anyString()).symbol("ETH_KRW").timeTag(LocalDateTime.now().minusDays(10)).build());
-        testData.add(Ticker.builder().id(anyString()).symbol("ETH_KRW").timeTag(LocalDateTime.now().minusDays(2)).build());
-        testData.add(Ticker.builder().id(anyString()).symbol("ETH_KRW").timeTag(LocalDateTime.now().minusDays(3)).build());
-        testData.add(Ticker.builder().id(anyString()).symbol("BTC_KRW").timeTag(LocalDateTime.now()).build());
-        testData.add(Ticker.builder().id(anyString()).symbol("XLM_KRW").timeTag(LocalDateTime.now().minusDays(5)).build());
-        testData.add(Ticker.builder().id(anyString()).symbol("ADA_KRW").timeTag(LocalDateTime.now().minusDays(10)).build());
-        testData.add(Ticker.builder().id(anyString()).symbol("BTC_KRW").timeTag(LocalDateTime.now().minusDays(2)).build());
-        testData.add(Ticker.builder().id(anyString()).symbol("ETH_KRW").timeTag(LocalDateTime.now().minusDays(3)).build());
-        tickerRepository.saveAll(testData).subscribe();
-        assertThat(tickerRepository.findTickersBySymbolAndTimeTagIsAfter("ETH_KRW", LocalDateTime.now().minusDays(9)).count().block()).isEqualTo(5);
-    }
 
     @Test
     void deleteAll() {
-        tickerRepository.deleteAll().subscribe();
-        List<Ticker> testData = new ArrayList<>();
-        testData.add(Ticker.builder().id(anyString()).symbol("ETH_KRW").timeTag(LocalDateTime.now()).build());
-        testData.add(Ticker.builder().id(anyString()).symbol("ETH_KRW").timeTag(LocalDateTime.now().minusDays(5)).build());
-        testData.add(Ticker.builder().id(anyString()).symbol("ETH_KRW").timeTag(LocalDateTime.now().minusDays(10)).build());
-        testData.add(Ticker.builder().id(anyString()).symbol("ETH_KRW").timeTag(LocalDateTime.now().minusDays(2)).build());
-        testData.add(Ticker.builder().id(anyString()).symbol("ETH_KRW").timeTag(LocalDateTime.now().minusDays(3)).build());
-        testData.add(Ticker.builder().id(anyString()).symbol("BTC_KRW").timeTag(LocalDateTime.now()).build());
-        testData.add(Ticker.builder().id(anyString()).symbol("XLM_KRW").timeTag(LocalDateTime.now().minusDays(5)).build());
-        testData.add(Ticker.builder().id(anyString()).symbol("ADA_KRW").timeTag(LocalDateTime.now().minusDays(10)).build());
-        testData.add(Ticker.builder().id(anyString()).symbol("BTC_KRW").timeTag(LocalDateTime.now().minusDays(2)).build());
-        testData.add(Ticker.builder().id(anyString()).symbol("ETH_KRW").timeTag(LocalDateTime.now().minusDays(3)).build());
-        tickerRepository.saveAll(testData).subscribe();
-        tickerRepository.deleteAll().subscribe();
-        assertThat(tickerRepository.findAll().count().block()).isEqualTo(0);
-    }
-
-    @Test
-    void deleteTickersByTimeTagIsBefore() {
-        tickerRepository.deleteAll().subscribe();
+        tickerService.deleteAll().subscribe();
         List<Ticker> testData = new ArrayList<>();
         testData.add(Ticker.builder().id(anyString()).symbol("ETH_KRW").closePrice(1).timeTag(LocalDateTime.now()).build());
         testData.add(Ticker.builder().id(anyString()).symbol("ETH_KRW").closePrice(2).timeTag(LocalDateTime.now().minusDays(5)).build());
@@ -129,8 +104,28 @@ class TickerRepositoryTest {
         testData.add(Ticker.builder().id(anyString()).symbol("ADA_KRW").closePrice(3).timeTag(LocalDateTime.now().minusDays(10)).build());
         testData.add(Ticker.builder().id(anyString()).symbol("BTC_KRW").closePrice(4).timeTag(LocalDateTime.now().minusDays(2)).build());
         testData.add(Ticker.builder().id(anyString()).symbol("ETH_KRW").closePrice(2).timeTag(LocalDateTime.now().minusDays(3)).build());
-        tickerRepository.saveAll(Flux.fromStream(testData.stream())).blockLast();
-        tickerRepository.deleteTickersByTimeTagIsBefore(LocalDateTime.now().minusDays(9)).block();
-        assertThat(tickerRepository.findAll().count().block()).isEqualTo(8);
+        tickerService.saveAll(Flux.fromStream(testData.stream())).blockLast();
+        tickerService.deleteAll().block();
+        assertThat(tickerService.findAll().count().block()).isEqualTo(0);
+    }
+
+    @Test
+    void deleteOldData() {
+        tickerService.deleteAll().subscribe();
+        List<Ticker> testData = new ArrayList<>();
+        testData.add(Ticker.builder().id(anyString()).symbol("ETH_KRW").closePrice(1).timeTag(LocalDateTime.now()).build());
+        testData.add(Ticker.builder().id(anyString()).symbol("ETH_KRW").closePrice(2).timeTag(LocalDateTime.now().minusDays(5)).build());
+        testData.add(Ticker.builder().id(anyString()).symbol("ETH_KRW").closePrice(3).timeTag(LocalDateTime.now().minusDays(10)).build());
+        testData.add(Ticker.builder().id(anyString()).symbol("ETH_KRW").closePrice(4).timeTag(LocalDateTime.now().minusDays(2)).build());
+        testData.add(Ticker.builder().id(anyString()).symbol("ETH_KRW").closePrice(5).timeTag(LocalDateTime.now().minusDays(3)).build());
+        testData.add(Ticker.builder().id(anyString()).symbol("BTC_KRW").closePrice(6).timeTag(LocalDateTime.now()).build());
+        testData.add(Ticker.builder().id(anyString()).symbol("XLM_KRW").closePrice(2).timeTag(LocalDateTime.now().minusDays(5)).build());
+        testData.add(Ticker.builder().id(anyString()).symbol("ADA_KRW").closePrice(3).timeTag(LocalDateTime.now().minusDays(10)).build());
+        testData.add(Ticker.builder().id(anyString()).symbol("BTC_KRW").closePrice(4).timeTag(LocalDateTime.now().minusDays(2)).build());
+        testData.add(Ticker.builder().id(anyString()).symbol("ETH_KRW").closePrice(2).timeTag(LocalDateTime.now().minusDays(3)).build());
+        tickerService.saveAll(Flux.fromStream(testData.stream())).blockLast();
+        tickerService.deleteOldData(9).block();
+        assertThat(tickerService.findAll().count().block()).isEqualTo(8);
+
     }
 }

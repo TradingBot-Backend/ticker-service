@@ -1,4 +1,4 @@
-package com.tradingbot.tickerservice.domain;
+package com.tradingbot.tickerservice.ticker.domain;
 
 //Major 10 Coins Selected from Bithumb Platform
 public enum Symbol {

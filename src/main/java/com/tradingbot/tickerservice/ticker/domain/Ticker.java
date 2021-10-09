@@ -1,4 +1,4 @@
-package com.tradingbot.tickerservice.domain;
+package com.tradingbot.tickerservice.ticker.domain;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -12,7 +12,6 @@ import org.springframework.boot.jackson.JsonComponent;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
-import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDateTime;
 
