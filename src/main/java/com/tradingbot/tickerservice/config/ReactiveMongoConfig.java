@@ -1,6 +1,6 @@
 package com.tradingbot.tickerservice.config;
-import com.mongodb.ConnectionString;
-import com.mongodb.MongoClientSettings;
+import com.mongodb.*;
+import com.mongodb.connection.ClusterSettings;
 import com.mongodb.connection.ConnectionPoolSettings;
 import com.mongodb.reactivestreams.client.MongoClient;
 
@@ -16,21 +16,30 @@ import org.springframework.data.mongodb.config.AbstractReactiveMongoConfiguratio
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
 import org.springframework.data.mongodb.repository.config.EnableReactiveMongoRepositories;
 
+import static java.util.Collections.singletonList;
+
 @Configuration
 public class ReactiveMongoConfig extends AbstractReactiveMongoConfiguration {
 
-    @Value("${spring.mongodb.uri}")
-    private String mongoUri;
-
-    @Value("${spring.mongodb.database}")
+    @Value("${spring.data.mongodb.database}")
     private String mongoDatabase;
+
+    @Value("${spring.data.mongodb.username}")
+    private String userName;
+
+    @Value("${spring.data.mongodb.password}")
+    private String passWord;
+
+    @Value("${spring.data.mongodb.host}")
+    private String host;
 
     @Override
     public MongoClient reactiveMongoClient(){
-        ConnectionString connString = new ConnectionString(mongoUri);
+        MongoCredential credential = MongoCredential.createCredential(userName, mongoDatabase, passWord.toCharArray());
+        Block<ClusterSettings.Builder> localhost = builder -> builder.hosts(singletonList(new ServerAddress(host, 27017)));
         MongoClientSettings settings = MongoClientSettings.builder()
-                .applyConnectionString(connString)
-                .retryWrites(true)
+                .applyToClusterSettings(localhost)
+                .credential(credential)
                 .build();
         return MongoClients.create(settings);
     }
