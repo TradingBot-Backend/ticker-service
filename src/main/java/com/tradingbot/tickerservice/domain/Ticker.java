@@ -20,7 +20,6 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonComponent
-@Builder
 @Document(collection = "tickers")
 public class Ticker {
     @JsonIgnore
